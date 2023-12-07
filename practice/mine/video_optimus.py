@@ -11,11 +11,14 @@
 from urllib import parse
 import requests
 import re
-import urllib
+# import urllib
 from bs4 import BeautifulSoup
 import selenium
+import random
+from Config import config
+# from urllib.request import urlopen
 
-session = requests.Session()
+
 #抖音是js动态加载的，需要解密参数signature
 headers = {
     'Connection':'keep-alive',
@@ -32,7 +35,7 @@ headers = {
     'Sec-Fetch-Site':'same-origin',
     'Sec-Fetch-User':'?1',
     'Upgrade-Insecure-Requests':'1',
-    'User=agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0'
+    'User-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0'
 
 }
 
@@ -46,16 +49,45 @@ url = 'https://www.douyin.com/video/7300081063383158068'
 # url = 'https://www.douyin.com/user/MS4wLjABAAAA8OWpsnPTnk8P7u_2_cPgl-vExjZ-IXaFyAR1BpbjZjg?vid=7306115162312903973' #努力的啊桐 respose444
 # url = 'https://www.douyin.com/user/MS4wLjABAAAApKwDi1yiBXlcNrsZtUILmCJdvWR47OoFXu8zb0v-2iU?vid=7218502285100404005'#妙卡    respose444
 
+#获得用户代理的随机数
+def get_random_number(data):
+    return random.randint(0, len(data)-1)
 
-rep = session.get(url, headers = headers)
-print(rep)
-bs = BeautifulSoup(rep.text, 'html.parser')
-title = bs.find('p', class_ = 'title')
-print(title)
-# aweme_list = rep.json().get('aweme_list')
+#用于获取主页收藏的视频链接
+def crawl(site):
+    random_index = get_random_number(config.user_agent_list)
+    random_agent = config.user_agent_list[random_index]
+    headers['User-agent'] = random_agent
+    session = requests.Session()
+    rep = session.get(site, headers=headers, allow_redirects=False, timeout=20)
+    print(rep.status_code)
+    data = rep.text
+    # print(data)
+    bs = BeautifulSoup(data, 'html.parser')
+    favorite = bs.find('ul', class_ = 'EZC0YBrG Nfs9sicY')
+    print(favorite)
+    render_data = re.findall('<script id="RENDER_DATA" type="application/json">(.*?)</script>', data, re.S)[0]
+    # print(render_data)
+    parse_data_1 = parse.unquote(render_data)
+    # print(parse_data_1)
+    # parse_data_2 = eval(parse_data_1)
+    # print(parse_data_2)
+    video_url = 'https:' + re.findall('"playAddr":\[{"src":".*?{"src":"(.*?)"}]', parse_data_1, re.S)[0]
+    print(video_url)
+crawl(url)
+
+# session = requests.Session()
+
+# rep = session.get(url, headers = headers, allow_redirects = False, timeout = 20)
+# print(rep.text)
+# bs = BeautifulSoup(rep.text, 'html.parser')
+# title = bs.find('p', class_ = 'title')
+# print(title)
+
 
 
 # print(html)
+
 # print(html.text) #访问自己的是200，其他的是444，可能是因为data的原因
 
 #class="EZC0YBrG Nfs9sicY"
