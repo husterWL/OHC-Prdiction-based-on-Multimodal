@@ -1,7 +1,7 @@
 import sklearn
 import numpy as np
 import pandas   as pd
-import matplotlib as mlt
+import matplotlib.pyplot as plt
 import math
 import random
 import torch
@@ -40,7 +40,7 @@ sns.pairplot(train_dataset[['mpg', 'cylinders', 'displacement', 'weight']], diag
 train_status = train_dataset.describe()
 train_status.pop('mpg')
 train_status = train_status.transpose()
-print(train_status)
+print(train_status) #figure_1
 
 #从标签中分离特征,即训练模型时需要预测的值
 train_labels = train_dataset.pop('mpg')
@@ -70,9 +70,80 @@ def build_model():
     return model
 
 model = build_model()
-#检查模型，.summary()函数可以打印该模型的简单描述
-print(model.summary())
-#试用模型:从训练数据中批量获取‘10’条例子并对这些例子调用 model.predict
-example_batch = normed_train_data[:10]
-example_out = model.predict(example_batch)
-print(example_out)
+# #检查模型，.summary()函数可以打印该模型的简单描述
+# print(model.summary())
+# #试用模型:从训练数据中批量获取‘10’条例子并对这些例子调用 model.predict
+# example_batch = normed_train_data[:10]
+# example_out = model.predict(example_batch)
+# print(example_out)
+
+#训练模型：进行1000个epoch的训练，在history对象中记录训练、验证的准确性
+
+#打印.显示训练进度
+class printdot(keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        if epoch % 100 ==0:
+            print('')
+        print('.', end = '')
+        return super().on_epoch_end(epoch, logs)
+epoch = 1000
+
+
+#使用history对象中存储的统计信息进行可视化
+# his = pd.DataFrame(history.history)
+# his['epoch'] = history.epoch
+# print(his.tail())
+
+def plot_his(history):
+    his = pd.DataFrame(history.history)
+    his['epoch'] = history.epoch
+    plt.figure()
+    plt.xlabel('Epoch')
+    plt.ylabel('Mean Abs Error [mpg]')
+    plt.plot(his['epoch'], his['mae'], label = 'train error')
+    plt.plot(his['epoch'], his['val_mae'], label = 'val error')
+    plt.ylim([0, 5])
+    plt.legend()
+
+    plt.figure()
+    plt.xlabel('Epoch')
+    plt.ylabel('Mean Square Error [$mpg^2$]')
+    plt.plot(his['epoch'], his['mse'], label = 'train error')
+    plt.plot(his['epoch'], his['val_mse'], label = 'val error')
+    plt.ylim([0,20])
+    plt.legend()
+    plt.show()
+
+#设置断点，当验证值没有提高时自动结束训练
+early_stop = keras.callbacks.EarlyStopping(monitor = 'val_loss', patience = 10)
+history = model.fit(
+    normed_train_data,
+    train_labels,
+    epochs = epoch,
+    validation_split = 0.2,
+    verbose = 0,
+    callbacks = [early_stop, printdot()]
+)
+
+plot_his(history)
+
+#查看泛化效果
+loss, mae, mse = model.evaluate(normed_test_data, test_labels, verbose = 1)
+print('testing set mean abs error :{:5.2f} mpg'.format(mae))
+
+#预测：使用测试集数据来预测MPG值
+test_pridic = model.predict(normed_test_data).flatten()
+plt.scatter(test_labels, test_pridic)
+plt.xlabel('true mpg values')
+plt.ylabel('predict mpg values')
+plt.axis('equal')
+plt.axis('square')
+plt.xlim([0, plt.xlim()[1]])
+plt.ylim([0, plt.ylim()[1]])
+_ = plt.plot([-100, 100], [-100,100])
+
+#预测的误差分布：
+error = test_pridic - test_labels
+plt.hist(error, bins = 25)
+plt.xlabel('prediction error mpg')
+_ = plt.ylabel('count')
