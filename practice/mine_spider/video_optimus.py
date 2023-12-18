@@ -21,6 +21,7 @@ from bs4 import BeautifulSoup
 import selenium
 # from selenium import webdriver
 from seleniumwire import webdriver
+from selenium.webdriver.common.by import By
 import random
 from Config import config
 import time
@@ -51,9 +52,9 @@ data = {
     
 }
 
-# url = 'https://m.douyin.com/user/MS4wLjABAAAAztmNcl6IuIaPLfdjJX73RKTy2X--P8GKi0z87YlP9hnpjlLrZrO3ZmRkpW74AdR2'
-# url = 'https://www.douyin.com/user/MS4wLjABAAAAztmNcl6IuIaPLfdjJX73RKTy2X--P8GKi0z87YlP9hnpjlLrZrO3ZmRkpW74AdR2?showTab=favorite_collection'
-url = 'https://www.douyin.com/video/7300081063383158068'
+# url = 'https://www.douyin.com/user/MS4wLjABAAAAztmNcl6IuIaPLfdjJX73RKTy2X--P8GKi0z87YlP9hnpjlLrZrO3ZmRkpW74AdR2'
+url = 'https://www.douyin.com/user/MS4wLjABAAAAztmNcl6IuIaPLfdjJX73RKTy2X--P8GKi0z87YlP9hnpjlLrZrO3ZmRkpW74AdR2?showTab=favorite_collection'
+# url = 'https://www.douyin.com/video/7300081063383158068'
 # url = 'https://www.douyin.com/video/7305291937240665354'
 # url = 'https://www.douyin.com/user/MS4wLjABAAAA8OWpsnPTnk8P7u_2_cPgl-vExjZ-IXaFyAR1BpbjZjg?vid=7306115162312903973' #努力的啊桐 respose444
 # url = 'https://www.douyin.com/user/MS4wLjABAAAApKwDi1yiBXlcNrsZtUILmCJdvWR47OoFXu8zb0v-2iU?vid=7218502285100404005'#妙卡    respose444
@@ -62,7 +63,7 @@ url = 'https://www.douyin.com/video/7300081063383158068'
 def get_random_number(data):
     return random.randint(0, len(data)-1)
 
-#用于获取主页收藏的视频链接
+#使用普通spider获取主页收藏的视频链接
 def crawl(site):
     random_index = get_random_number(config.user_agent_list)
     random_agent = config.user_agent_list[random_index]
@@ -104,6 +105,8 @@ def imitate(site):
     # time.sleep(20)
     browser.close()
 # imitate(url)
+
+##进入相应网页
 options = webdriver.EdgeOptions()
 options.add_argument('--disable-blink-features=AutomationControlled')
 options.add_experimental_option('useAutomationExtension', False)
@@ -125,16 +128,29 @@ with open('practice/mine_spider/cookies.txt','r') as f:
         browser.add_cookie(cookie)
 
 browser.refresh()
-time.sleep(30)
-browser.close()
+time.sleep(10)
+# browser.close()
+
+##在我的收藏页面进入每一个收藏视频的原页面获取相应的视频地址/模拟鼠标悬停获取网络部分的mime_type属性为video_mp4的媒体文件
+##1、按顺序遍历获取每一个视频的链接，直到最近下载的一个视频那里停止（这里的确认方法是将每次下载的第一个视频的原链接存储为一个文件，每次下载会将它读取出来，然后遍历的时候进行比较，看是否相同）
+##1、这个方法的缺点就是如果那第一个视频被删除，那么也就代表它不会再出现在收藏列表中，那么会一直下载下去。
+###1
+
+##2、模拟鼠标获取网络日志中的媒体文件，确认方法同上。
+###2    这里的重点是如何进行定位
+src = browser.find_element(By.XPATH, '//*[@id="douyin-right-container"]/div[2]/div/div/div[3]/div/div/div[2]/div/div[2]/div/div/ul/li[1]/div/a').get_attribute('href')
+print(src)
 
 
+#以下的JavaScript部分属性名会改变
 #class="EZC0YBrG Nfs9sicY"
 #class="Eie04v01 _Vm86aQ7 PISbKxf7"
 #class="B3AsdZT9 chmb2GX8 DiMJX01_"
-#视频是https://www.douyin.com/video/*******；图文是https://www.douyin.com/note/*******。
+#视频是https://www.douyin.com/video /*******；图文是https://www.douyin.com/note/*******。
+#相应的列表视频地址的js路径：document.querySelector("#douyin-right-container > div.tQ0DXWWO.DAet3nqK.userNewUi > div > div > div.GE_yTyVX > div > div > div.lNYhMAbF > div > div:nth-child(2) > div > div > ul > li:nth-child(1) > div > a")
+##douyin-right-container > div.tQ0DXWWO.DAet3nqK.userNewUi > div > div > div.GE_yTyVX > div > div > div.lNYhMAbF > div > div:nth-child(2) > div > div > ul > li:nth-child(1) > div > a
+#完整的xpath路径   /html/body/div[2]/div[1]/div[4]/div[2]/div/div/div[3]/div/div/div[2]/div/div[2]/div/div/ul/li[1]/div/a
+#上面的这个已经直接到链接了
+#到scroll-list是/ul/这一等级，下面的li[x]代表的是收藏列表中的第x个视频
 
-
-# html_data = re.findall('<script id="RENDER_DATA" type="application/json">(.*?)</script>', html.text, re.S)[0]
-
-# html_data = eval(parse.unquote(html_data))
+#以上方法还会遇到一个问题，就是有的收藏是note，也就是图文，而不是视频，这个还需要去判定
