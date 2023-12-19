@@ -118,7 +118,7 @@ prefs = {"profile.managed_default_content_settings.images": 2}
 options.add_experimental_option("prefs", prefs)
 user_ag = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.188'
 options.add_argument('user-agent=%s' % user_ag)
-browser = webdriver.Edge()
+browser = webdriver.Edge(options = options)
 browser.get(url)
 browser.delete_all_cookies()
 with open('practice/mine_spider/cookies.txt','r') as f:
@@ -154,3 +154,49 @@ print(src)
 #到scroll-list是/ul/这一等级，下面的li[x]代表的是收藏列表中的第x个视频
 
 #以上方法还会遇到一个问题，就是有的收藏是note，也就是图文，而不是视频，这个还需要去判定
+
+class douyin_spider():
+
+    #初始化
+    def __init__(self, url) -> None:
+        pass
+        self.url = url
+        self.options = webdriver.EdgeOptions()
+        self.options.add_argument('--disable-blink-features=AutomationControlled')
+        self.options.add_experimental_option('useAutomationExtension', False)
+        # 模拟请求，避免被反爬
+        self.options.add_experimental_option('excludeSwitches', ['enable-automation'])
+        self.options.add_experimental_option('detach', True)
+        # 获取请求信息，避免被反爬
+        prefs = {"profile.managed_default_content_settings.images": 2}
+        self.options.add_experimental_option("prefs", prefs)
+        random_index = get_random_number(config.user_agent_list)
+        random_agent = config.user_agent_list[random_index]
+        self.options.add_argument('user-agent=%s' % random_agent)
+        self.browser = webdriver.Edge(options = self.options)
+        with open ('practice/mine_spider/cookies.txt', 'r') as f:
+            self.cookies_list = json.load(f)
+        
+        
+    def base(self):
+        pass
+        self.browser.get(self.url)
+        self.browser.delete_all_cookies()
+        for cookie in self.cookies_list:
+            self.browser.add_cookie(cookie)
+        self.browser.refresh()
+        time.sleep(10)
+
+    def get_cookie(self):
+        browser = webdriver.Edge()  #seleniumwire_options = headers
+        browser.get(self.url)
+        time.sleep(20)
+        with open('practice/mine_spider/cookies.txt','w') as f:
+            f.write(json.dumps(browser.get_cookies()))
+        browser.close()
+        with open ('practice/mine_spider/cookies.txt', 'r') as f:
+            self.cookies_list = json.load(f)
+            
+    def get_vedio_list(self):
+        src = self.browser.find_element(By.XPATH, '//*[@id="douyin-right-container"]/div[2]/div/div/div[3]/div/div/div[2]/div/div[2]/div/div/ul/li[1]/div/a').get_attribute('href')
+        print(src)
