@@ -43,3 +43,6 @@
     现在的想法是全部使用scrapy
     scrapy学习地址：https://www.runoob.com/w3cnote/scrapy-detail.html、https://blog.csdn.net/ck784101777/article/details/104468780
     
+    注意注释，最好不用中文（2.6.1）
+    运行spider时注意scrapy版本，2.6.1时运行会出现openssl的错误，更新到2.11.0时可以正常运行
+    运行时返回2023-12-24 15:46:10 [scrapy.core.engine] INFO: Spider closed (finished)代表了执行完成
