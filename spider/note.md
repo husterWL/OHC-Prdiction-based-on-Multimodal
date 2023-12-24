@@ -19,3 +19,27 @@
     Sec-Fetch-User: ?1
     Upgrade-Insecure-Requests:  1
     User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0
+
+# 2023年12月21日
+    好大夫爬取思路：
+    网址：https://www.haodf.com/，然后进入到/doctor/list.html
+    选择相应的科室医生进行爬取（也不一定是科室医生，也可能是按疾病找医生，这个需要按照毕设整体的思路，还需要考虑）
+    /doctor/list-all-shaoshangneike.html?p=1（或者?p=2以此往后）
+    在list中/html/body/div[2]/div/div[1]/div[2]/ul/li[1]即为某一个医生的相关资源
+    其中包含链接，链接内有医生的专属编号（https://www.haodf.com/doctor/******.html）可以根据专属编号来判断是否爬取过
+    还要判断医生是否包含头像（牛：https://n1.hdfimg.com/g2/M03/71/DC/yIYBAFw8OIyAQbw2AAAWC2_R7lQ743_200_200_1.png?8901，其他的要自己识别，应该不是很多）、是否开通在线问诊服务（直接在网页上提取文字“未开通”判断）
+
+# 2023年12月22日
+    可以三种方式都使用一遍
+    1、requests+xpath
+    2、selenium+webdriver
+    3、scrapy
+
+# 2023年12月24日
+    验证过后：
+    fuwu_wenzhen.html部分含有vue.js部分，无法使用requests进行爬取；selenium速度太慢；
+    现在的比较好的方法有两个：可以使用requests爬取的用requests，剩下的用selenium；全部使用scrapy
+
+    现在的想法是全部使用scrapy
+    scrapy学习地址：https://www.runoob.com/w3cnote/scrapy-detail.html、https://blog.csdn.net/ck784101777/article/details/104468780
+    
