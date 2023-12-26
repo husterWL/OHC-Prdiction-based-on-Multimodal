@@ -46,3 +46,30 @@
     注意注释，最好不用中文（2.6.1）
     运行spider时注意scrapy版本，2.6.1时运行会出现openssl的错误，更新到2.11.0时可以正常运行
     运行时返回2023-12-24 15:46:10 [scrapy.core.engine] INFO: Spider closed (finished)代表了执行完成
+
+# 2023年12月25日
+    scrapy保存数据四种方式（-o输出指定格式的文件）：
+    1、scrapy crawl 爬虫名 -o 文件名.json
+    2、scrapy crawl 爬虫名 -o 文件名.jsonl  #json lines 格式，默认为unicode编码
+    3、scrapy crawl 爬虫名 -o 文件名.csv    #csv逗号表达式，表格
+    4、scrapy crawl 爬虫名 -o 文件名.xml    #xml格式
+
+    若打印的文件乱码，设置FEED_EXPORT_ENCODING = 'UTF-8'即可，具体见scrapy文档
+
+    文件结构（生成内容：医生生成内容、患者生成内容、系统生成内容；虽然是三个部分，但都是围绕医生展开的）图像、文本、数值
+    -Hdaof
+    --doctor.json(包含doctorID（主键）、)
+    --patient.json(包含doctorID（主键）)
+    --doctorIMG
+    ---****id.jpg
+
+# 2023年12月26日
+    估计要使用疾病来查找医生
+    -Hdaof
+    --doctor.json(包含doctorID（主键）、姓名、职称、医院、医院等级、文字简介、价格、暖心记录次数)
+    --patient.json(包含doctorID（主键）、患者评论数、患者礼物数量)
+    --system.json(包含doctorID（主键）、年度好大夫次数、病友推荐度、治疗经验（服务星、诊治患者数、随访患者数）、得票数)
+    --doctorIMG
+    ---****id.jpg
+    --comment
+    ---doctorID.json(包含日期时间、疗效满意度、治疗方式、态度满意度、目前病情状态、评论内容、序号、是否包含图片保证真实性)
