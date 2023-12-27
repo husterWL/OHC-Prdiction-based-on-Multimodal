@@ -22,7 +22,7 @@ class TestSpider(scrapy.Spider):
             # name = i.extract()    #返回的是列表
             
             item['name'] = i
-            
+            # response.urljoin()
             items.append(item)
         print(items)
         return items

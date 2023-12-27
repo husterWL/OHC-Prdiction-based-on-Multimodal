@@ -7,7 +7,7 @@ import random
 import torch
 from torch import nn
 import os
-os.environ["KERAS_BACKEND"] = 'torch'   #需要设置之后才能正常导入，或者在.keras/keras.json文件中将backend数学改成torch（tensorflow/jax）
+os.environ["KERAS_BACKEND"] = 'torch'   #需要设置之后才能正常导入，或者在.keras/keras.json文件中将backend属性改成torch（tensorflow/jax）
 
 import keras
 import keras.layers as layers

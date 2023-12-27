@@ -11,5 +11,9 @@ class HaodfSpiderWlItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     
+    #主键
+    doctorID = scrapy.Field()
+
     name = scrapy.Field()
     
+    #
